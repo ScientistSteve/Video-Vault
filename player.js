@@ -35,15 +35,15 @@ const videos = [
         "videoUrl": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
         "duration": "12:14",
         "rating": 4
-    }
+    },
     {
-    "id": "5",
-    "title": "Miraculous Ladybug London Special",
-    "description": "Your video description here.",
-    "thumbnail": "https://via.placeholder.com/800x450.png?text=Thumbnail",
-    "videoUrl": "https://drive.google.com/uc?export=download&id=1OU1jOLMteiF979eF7ldh5Hatr8RpFZX0",
-    "duration": "49:53",
-    "rating": 5
+        "id": "5",
+        "title": "Miraculous Ladybug London Special",
+        "description": "Your video description here.",
+        "thumbnail": "https://via.placeholder.com/800x450.png?text=Thumbnail",
+        "videoUrl": "https://drive.google.com/uc?export=download&id=1OU1jOLMteiF979eF7ldh5Hatr8RpFZX0",
+        "duration": "49:53",
+        "rating": 5
     }
 ];
 
