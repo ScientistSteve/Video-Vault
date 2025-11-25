@@ -2,82 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Video Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VaultStreaming</title>
     
-    <!-- Google Fonts -->
+    <!-- Fonts: DM Sans (Headings) & Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Splash Screen -->
+    <!-- 1. Modern Startup Animation -->
     <div id="splash-screen">
         <div class="splash-content">
-            <span class="material-symbols-rounded splash-icon">lock_open</span>
-            <h1 class="splash-text">VAULT</h1>
+            <span class="material-symbols-rounded" id="splash-lock">lock</span>
         </div>
+        <div class="splash-bg"></div>
     </div>
 
     <!-- Header -->
     <nav class="navbar">
         <div class="logo">
-            <span class="material-symbols-rounded icon-logo">lock</span>
-            <h1>Vault</h1>
+            <span class="material-symbols-rounded icon-logo">lock_open</span>
+            <h1>VaultStreaming</h1>
         </div>
         <div class="nav-actions">
             <div class="search-box" id="search-box">
-                <input type="text" id="search-input" placeholder="Search videos...">
+                <input type="text" id="search-input" placeholder="Search...">
             </div>
             <button class="icon-btn" id="search-toggle"><span class="material-symbols-rounded">search</span></button>
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Main Content: Swipe Deck -->
     <main class="container">
-        <div class="section-header">
-            <h2>Your Library</h2>
-            <span class="chip" id="video-count">Loading...</span>
+        <!-- The Swipeable Card Container -->
+        <div class="card-deck-wrapper">
+            <div id="card-deck" class="card-deck">
+                <!-- Cards injected via JS -->
+            </div>
         </div>
 
-        <div id="video-grid" class="video-grid">
-            <!-- Videos will be injected here -->
-        </div>
-        
+        <!-- No Results Msg -->
         <div id="no-results" class="hidden">
             <p>No videos found.</p>
         </div>
     </main>
 
-    <!-- Player Overlay -->
+    <!-- Bottom Floating Action Bar -->
+    <div class="floating-dock">
+        <button class="dock-btn" id="dock-like">
+            <span class="material-symbols-rounded">favorite</span>
+        </button>
+        <button class="dock-btn main-action" id="dock-download">
+            <span class="material-symbols-rounded">download</span>
+        </button>
+        <button class="dock-btn" id="dock-share">
+            <span class="material-symbols-rounded">share</span>
+        </button>
+    </div>
+
+    <!-- Fullscreen Player Overlay -->
     <div id="player-overlay" class="player-overlay hidden">
         <div class="player-container">
-            
-            <!-- Video Wrapper -->
             <div class="video-wrapper" id="video-wrapper">
                 <video id="main-video" preload="metadata"></video>
 
                 <!-- Gesture Visuals -->
                 <div class="gesture-feedback left" id="feedback-left">
                     <span class="material-symbols-rounded">replay_10</span>
-                    <p>-10s</p>
                 </div>
                 <div class="gesture-feedback right" id="feedback-right">
                     <span class="material-symbols-rounded">forward_10</span>
-                    <p>+10s</p>
                 </div>
                 
-                <!-- Controls UI -->
+                <!-- Controls -->
                 <div class="controls-layer">
                     <div class="controls-top">
                         <button id="close-player" class="icon-btn glass"><span class="material-symbols-rounded">close</span></button>
-                        <h3 id="player-title" class="truncate">Video Title</h3>
+                        <h3 id="player-title" class="truncate">Title</h3>
                         <div class="spacer"></div>
-                        <button id="download-btn" class="icon-btn glass"><span class="material-symbols-rounded">download</span></button>
+                        <!-- Removed Download from here as per request -->
                     </div>
 
                     <button id="center-play" class="play-btn-lg">
@@ -94,38 +104,20 @@
                         <div class="controls-row">
                             <div class="left-controls">
                                 <button id="play-pause" class="icon-btn"><span class="material-symbols-rounded">play_arrow</span></button>
-                                <button id="rewind-btn" class="icon-btn sm-btn"><span class="material-symbols-rounded">replay_10</span></button>
-                                <button id="forward-btn" class="icon-btn sm-btn"><span class="material-symbols-rounded">forward_10</span></button>
                                 <span id="time-display">00:00 / 00:00</span>
                             </div>
                             
                             <div class="right-controls">
-                                <div class="rating-box">
-                                    <span class="material-symbols-rounded star" data-value="1">star</span>
-                                    <span class="material-symbols-rounded star" data-value="2">star</span>
-                                    <span class="material-symbols-rounded star" data-value="3">star</span>
-                                    <span class="material-symbols-rounded star" data-value="4">star</span>
-                                    <span class="material-symbols-rounded star" data-value="5">star</span>
-                                </div>
+                                <!-- Removed Rating as per request -->
                                 <button id="fullscreen-btn" class="icon-btn"><span class="material-symbols-rounded">fullscreen</span></button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Video Info -->
-            <div class="player-info">
-                <h2 id="info-title">Loading...</h2>
-                <div class="meta-tags">
-                    <span class="tag">HD</span>
-                    <span class="tag" id="info-duration">--:--</span>
-                </div>
-                <p id="info-desc">Description...</p>
-            </div>
         </div>
     </div>
 
     <script src="player.js"></script>
 </body>
-</html>
+    </html>
