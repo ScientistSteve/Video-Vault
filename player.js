@@ -1,117 +1,178 @@
-// --- DATA: Embedded to prevent "Fetch" errors on local files ---
+// --- DATA: Embedded ---
 const videos = [
     {
         "id": "1",
         "title": "Big Buck Bunny",
-        "description": "A large and lovable rabbit deals with three tiny bullies, led by a flying squirrel.",
+        "description": "A large and lovable rabbit deals with three tiny bullies.",
         "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/800px-Big_buck_bunny_poster_big.jpg",
         "videoUrl": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        "duration": "09:56",
-        "rating": 4
+        "duration": "09:56"
     },
     {
         "id": "2",
         "title": "Elephants Dream",
-        "description": "The world's first open movie, made entirely with open source graphics software.",
+        "description": "The world's first open movie, made entirely with open source.",
         "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Elephants_Dream_s5_both.jpg/800px-Elephants_Dream_s5_both.jpg",
         "videoUrl": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-        "duration": "10:53",
-        "rating": 3
+        "duration": "10:53"
     },
     {
         "id": "3",
         "title": "Sintel",
-        "description": "A lonely young woman, Sintel, helps and befriends a dragon, whom she calls Scales.",
+        "description": "A lonely young woman, Sintel, helps and befriends a dragon.",
         "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Sintel_poster.png/800px-Sintel_poster.png",
         "videoUrl": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-        "duration": "14:48",
-        "rating": 5
+        "duration": "14:48"
     },
     {
         "id": "4",
         "title": "Tears of Steel",
-        "description": "A group of warriors and scientists gather at the Oude Kerk in Amsterdam.",
+        "description": "Warriors and scientists gather at the Oude Kerk in Amsterdam.",
         "thumbnail": "https://mango.blender.org/wp-content/uploads/2013/05/01_thom_celia_bridge.jpg",
         "videoUrl": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-        "duration": "12:14",
-        "rating": 4
+        "duration": "12:14"
     },
     {
         "id": "5",
-        "title": "Miraculous Ladybug London Special",
-        "description": "Your video description here.",
-        "thumbnail": "https://via.placeholder.com/800x450.png?text=Thumbnail",
-        "videoUrl": "https://drive.google.com/uc?export=download&id=1OU1jOLMteiF979eF7ldh5Hatr8RpFZX0",
-        "duration": "49:53",
-        "rating": 5
+        "title": "Cosmos Laundromat",
+        "description": "Franck, a depressed sheep, sees his life change.",
+        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Cosmos_Laundromat_-_Poster.jpg",
+        "videoUrl": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4", /* Placeholder */
+        "duration": "12:10"
     }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- State ---
+    let currentIndex = 0;
+    let currentList = [...videos];
+
     // --- Elements ---
-    const videoGrid = document.getElementById('video-grid');
-    const videoCount = document.getElementById('video-count');
+    const cardDeck = document.getElementById('card-deck');
     const searchToggle = document.getElementById('search-toggle');
     const searchBox = document.getElementById('search-box');
     const searchInput = document.getElementById('search-input');
-    const noResults = document.getElementById('no-results');
+    
+    // Bottom Dock Elements
+    const btnLike = document.getElementById('dock-like');
+    const btnDownload = document.getElementById('dock-download');
+    const btnShare = document.getElementById('dock-share');
 
     // Player Elements
     const playerOverlay = document.getElementById('player-overlay');
     const videoWrapper = document.getElementById('video-wrapper');
     const videoPlayer = document.getElementById('main-video');
     const closeBtn = document.getElementById('close-player');
-    const downloadBtn = document.getElementById('download-btn');
     const playPauseBtn = document.getElementById('play-pause');
     const centerPlayBtn = document.getElementById('center-play');
-    const rewindBtn = document.getElementById('rewind-btn');
-    const forwardBtn = document.getElementById('forward-btn');
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    
-    // Progress Bar
     const seekSlider = document.getElementById('seek-slider');
     const progressFill = document.getElementById('progress-fill');
     const timeDisplay = document.getElementById('time-display');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
 
-    // --- 1. Splash Screen Cleanup (Safety) ---
+    // --- 1. Startup & Animation Handling ---
+    const lockIcon = document.getElementById('splash-lock');
     setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        splash.style.display = 'none'; // Force hide in case CSS fails
-    }, 2600);
+        // Change icon mid-animation
+        lockIcon.textContent = 'lock_open';
+    }, 1200);
 
-    // --- 2. Initialize ---
-    renderVideos(videos);
-    videoCount.textContent = `${videos.length} Videos`;
+    // --- 2. Render Deck ---
+    function renderDeck() {
+        cardDeck.innerHTML = '';
+        if(currentList.length === 0) {
+            document.getElementById('no-results').classList.remove('hidden');
+            return;
+        }
+        document.getElementById('no-results').classList.add('hidden');
 
-    function renderVideos(list) {
-        videoGrid.innerHTML = '';
-        if(list.length === 0) {
-            noResults.classList.remove('hidden');
-        } else {
-            noResults.classList.add('hidden');
-            list.forEach(video => {
-                const card = document.createElement('div');
-                card.classList.add('video-card');
-                card.onclick = () => openPlayer(video);
-                card.innerHTML = `
-                    <div class="thumbnail-container">
-                        <img src="${video.thumbnail}" alt="${video.title}" loading="lazy">
-                        <span class="duration-badge">${video.duration}</span>
-                    </div>
-                    <div class="card-info">
-                        <h3 class="card-title">${video.title}</h3>
-                        <div class="card-meta">
-                            <span>${video.rating || 0} ★</span>
-                            <span class="material-symbols-rounded" style="font-size:18px; color:var(--accent)">play_circle</span>
-                        </div>
-                    </div>
-                `;
-                videoGrid.appendChild(card);
-            });
+        currentList.forEach((video, index) => {
+            const card = document.createElement('div');
+            card.className = `video-card ${getCardState(index)}`;
+            card.dataset.index = index;
+            
+            card.innerHTML = `
+                <img src="${video.thumbnail}" alt="${video.title}">
+                <div class="card-content">
+                    <h2>${video.title}</h2>
+                    <span class="card-meta">${video.duration} • 4K</span>
+                </div>
+            `;
+            
+            // Interaction
+            card.onclick = () => {
+                if(index === currentIndex) openPlayer(video);
+                else {
+                    currentIndex = index;
+                    updateDeckVisuals();
+                }
+            };
+
+            cardDeck.appendChild(card);
+        });
+        updateDock();
+    }
+
+    function getCardState(index) {
+        if (index === currentIndex) return 'active';
+        if (index === currentIndex - 1) return 'prev';
+        if (index === currentIndex + 1) return 'next';
+        return 'hidden';
+    }
+
+    function updateDeckVisuals() {
+        const cards = document.querySelectorAll('.video-card');
+        cards.forEach((card, index) => {
+            card.className = `video-card ${getCardState(index)}`;
+        });
+        updateDock(); // Reset like button state for new video
+    }
+
+    // --- 3. Swipe Logic (Touch & Mouse) ---
+    let startX = 0;
+    let isDragging = false;
+
+    document.querySelector('.card-deck-wrapper').addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    });
+
+    document.querySelector('.card-deck-wrapper').addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        const endX = e.changedTouches[0].clientX;
+        handleSwipe(startX, endX);
+        isDragging = false;
+    });
+
+    // Mouse support for desktop testing
+    document.querySelector('.card-deck-wrapper').addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        isDragging = true;
+    });
+
+    document.querySelector('.card-deck-wrapper').addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        handleSwipe(startX, e.clientX);
+        isDragging = false;
+    });
+
+    function handleSwipe(start, end) {
+        const threshold = 50;
+        const diff = start - end;
+
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                // Swiped Left -> Next Video
+                if (currentIndex < currentList.length - 1) currentIndex++;
+            } else {
+                // Swiped Right -> Prev Video
+                if (currentIndex > 0) currentIndex--;
+            }
+            updateDeckVisuals();
         }
     }
 
-    // --- 3. Search ---
+    // --- 4. Search ---
     searchToggle.addEventListener('click', () => {
         searchBox.classList.toggle('active');
         if (searchBox.classList.contains('active')) searchInput.focus();
@@ -119,11 +180,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        const filtered = videos.filter(v => v.title.toLowerCase().includes(term));
-        renderVideos(filtered);
+        currentList = videos.filter(v => v.title.toLowerCase().includes(term));
+        currentIndex = 0;
+        renderDeck();
     });
 
-    // --- 4. Player Logic ---
+    // --- 5. Dock Actions ---
+    function updateDock() {
+        // Reset like button visual
+        btnLike.classList.remove('liked');
+        btnLike.querySelector('span').textContent = 'favorite';
+    }
+
+    btnLike.addEventListener('click', () => {
+        btnLike.classList.toggle('liked');
+        const icon = btnLike.querySelector('span');
+        icon.textContent = btnLike.classList.contains('liked') ? 'favorite' : 'favorite'; // Filled vs outlined handled by CSS/Font
+    });
+
+    btnDownload.addEventListener('click', () => {
+        const video = currentList[currentIndex];
+        const link = getDirectLink(video.videoUrl);
+        window.open(link, '_blank');
+    });
+
+    btnShare.addEventListener('click', () => {
+        const video = currentList[currentIndex];
+        if (navigator.share) {
+            navigator.share({
+                title: video.title,
+                text: `Watch ${video.title} on VaultStreaming!`,
+                url: window.location.href
+            });
+        } else {
+            alert('Link copied to clipboard!');
+        }
+    });
+
+    // --- 6. Player Logic ---
     function getDirectLink(url) {
         if (url.includes('drive.google.com')) {
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -135,31 +229,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function openPlayer(video) {
         const src = getDirectLink(video.videoUrl);
         videoPlayer.src = src;
-        videoPlayer.poster = video.thumbnail;
-        
         document.getElementById('player-title').textContent = video.title;
-        document.getElementById('info-title').textContent = video.title;
-        document.getElementById('info-desc').textContent = video.description;
-        document.getElementById('info-duration').textContent = video.duration;
-        
-        downloadBtn.onclick = () => window.open(src, '_blank');
-        updateRatingUI(video.rating || 0);
         
         playerOverlay.classList.remove('hidden');
         videoWrapper.classList.remove('paused');
         
+        // Try auto-fullscreen on mobile
+        if(window.innerWidth < 768) {
+            // Browsers often block this without direct interaction, but we try
+            // or we just rely on the layout being immersive
+        }
+
         videoPlayer.play().then(() => updatePlayIcon(true))
-        .catch(e => { console.log("Autoplay blocked"); updatePlayIcon(false); });
+        .catch(() => updatePlayIcon(false));
     }
 
     closeBtn.addEventListener('click', () => {
         playerOverlay.classList.add('hidden');
         videoPlayer.pause();
-        videoPlayer.currentTime = 0;
         videoPlayer.src = "";
     });
 
-    // Play/Pause
     function togglePlay() {
         if (videoPlayer.paused) {
             videoPlayer.play();
@@ -174,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const icon = isPlaying ? 'pause' : 'play_arrow';
         playPauseBtn.querySelector('span').textContent = icon;
         centerPlayBtn.querySelector('span').textContent = icon;
-        
         if(isPlaying) {
             centerPlayBtn.style.opacity = '0';
             centerPlayBtn.style.transform = 'translate(-50%, -50%) scale(1.5)';
@@ -186,104 +275,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Player Gestures & Inputs
     playPauseBtn.addEventListener('click', togglePlay);
     centerPlayBtn.addEventListener('click', togglePlay);
-    
-    // --- 5. Progress Bar Logic ---
+    videoWrapper.addEventListener('click', (e) => {
+        if(!e.target.closest('.controls-layer') && !e.target.closest('button')) togglePlay();
+    });
+
     videoPlayer.addEventListener('timeupdate', () => {
         if(!videoPlayer.duration) return;
-        
         const pct = (videoPlayer.currentTime / videoPlayer.duration) * 100;
-        
         progressFill.style.width = `${pct}%`; 
         seekSlider.value = pct; 
-        
         timeDisplay.textContent = `${formatTime(videoPlayer.currentTime)} / ${formatTime(videoPlayer.duration)}`;
     });
 
     seekSlider.addEventListener('input', (e) => {
-        const val = e.target.value;
-        const time = (val / 100) * videoPlayer.duration;
+        const time = (e.target.value / 100) * videoPlayer.duration;
         videoPlayer.currentTime = time;
-        progressFill.style.width = `${val}%`;
     });
 
     function formatTime(s) {
-        const min = Math.floor(s / 60);
-        const sec = Math.floor(s % 60);
-        return `${min}:${sec < 10 ? '0'+sec : sec}`;
+        const m = Math.floor(s / 60);
+        const sc = Math.floor(s % 60);
+        return `${m}:${sc < 10 ? '0'+sc : sc}`;
     }
 
-    // --- 6. Gestures & Shortcuts ---
-    function skip(amount) {
-        videoPlayer.currentTime += amount;
-        triggerGestureAnim(amount > 0 ? 'right' : 'left');
-    }
-
-    function triggerGestureAnim(side) {
-        const el = document.getElementById(`feedback-${side}`);
-        el.classList.remove('active');
-        void el.offsetWidth; // Trigger reflow
-        el.classList.add('active');
-    }
-
-    rewindBtn.onclick = () => skip(-10);
-    forwardBtn.onclick = () => skip(10);
-
-    // Click Detection (Play vs Double Click)
-    let lastClick = 0;
-    videoWrapper.addEventListener('click', (e) => {
-        if(e.target.closest('.controls-bottom') || e.target.closest('.controls-top')) return;
-
-        const now = new Date().getTime();
-        const rect = videoWrapper.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const width = rect.width;
-
-        if (x > width * 0.35 && x < width * 0.65) {
-            togglePlay();
-            return;
-        }
-
-        if (now - lastClick < 300) {
-            if (x < width * 0.35) skip(-10);
-            if (x > width * 0.65) skip(10);
-        } 
-        lastClick = now;
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) videoWrapper.requestFullscreen().catch(e=>console.log(e));
+        else document.exitFullscreen();
     });
 
-    // Keyboard
-    document.addEventListener('keydown', (e) => {
-        if(playerOverlay.classList.contains('hidden')) return;
-        switch(e.key) {
-            case ' ': e.preventDefault(); togglePlay(); break;
-            case 'ArrowRight': skip(10); break;
-            case 'ArrowLeft': skip(-10); break;
-            case 'f': toggleFullScreen(); break;
-        }
-    });
-
-    fullscreenBtn.addEventListener('click', toggleFullScreen);
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            videoWrapper.requestFullscreen().catch(err => console.log(err));
-        } else {
-            document.exitFullscreen();
-        }
-    }
-
-    // Rating
-    const stars = document.querySelectorAll('.star');
-    stars.forEach(star => {
-        star.addEventListener('click', function() {
-            updateRatingUI(this.dataset.value);
-        });
-    });
-
-    function updateRatingUI(val) {
-        stars.forEach(s => {
-            if(parseInt(s.dataset.value) <= val) s.classList.add('active');
-            else s.classList.remove('active');
-        });
-    }
+    // Initialize
+    renderDeck();
 });
