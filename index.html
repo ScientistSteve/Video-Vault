@@ -31,26 +31,29 @@
             overflow: hidden; height: 100dvh; width: 100vw;
         }
 
-        /* --- STARTUP (SVG LOCK) --- */
+        /* --- BIOMETRIC STARTUP --- */
         #startup-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 50000;
-            display: flex; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease; pointer-events: none;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease;
         }
         
-        .svg-lock {
-            width: 80px; height: 80px; fill: white;
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        .zoom-anim .svg-lock { transform: scale(50); opacity: 0; }
+        .vault-lock-wrapper { position: relative; width: 80px; height: 100px; display: flex; justify-content: center; align-items: center; }
+        .svg-lock { width: 64px; height: 64px; overflow: visible; }
+        .lock-shackle { fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; transform-origin: 12px 10px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .lock-body { fill: white; transition: fill 0.3s ease; }
+        .scan-line { position: absolute; top: 0; left: -10%; width: 120%; height: 2px; background: var(--accent); box-shadow: 0 0 15px var(--accent), 0 0 30px var(--accent); opacity: 0; border-radius: 50%; }
+
+        .scanning .scan-line { opacity: 1; animation: scanMove 1.2s cubic-bezier(0.45, 0, 0.55, 1); }
+        @keyframes scanMove { 0% { top: 0%; opacity: 0; } 20% { opacity: 1; } 90% { top: 100%; opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        .unlocked .lock-shackle { transform: translateY(-5px) rotateY(15deg); stroke: var(--accent); filter: drop-shadow(0 0 8px var(--accent-glow)); }
+        .unlocked .lock-body { fill: var(--accent); filter: drop-shadow(0 0 15px var(--accent-glow)); }
+        .breach .vault-lock-wrapper { transform: scale(30); opacity: 0; transition: transform 0.6s cubic-bezier(0.7, 0, 0.84, 0), opacity 0.5s ease 0.1s; }
 
         /* --- UI LAYER --- */
-        #app-root {
-            height: 100%; width: 100%; position: relative;
-            display: flex; flex-direction: column; opacity: 0; transition: opacity 1s ease;
-        }
+        #app-root { height: 100%; width: 100%; position: relative; display: flex; flex-direction: column; opacity: 0; transition: opacity 0.8s ease; }
 
         header { position: absolute; top: 0; left: 0; width: 100%; padding: 1.5rem; height: 80px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
         header > * { pointer-events: auto; }
@@ -58,42 +61,17 @@
         .search-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); cursor: pointer; }
 
         /* --- FEED --- */
-        #feed-container { 
-            flex: 1; overflow-y: scroll; overflow-x: hidden; 
-            scroll-snap-type: y mandatory; 
-            scroll-behavior: smooth;
-            padding-top: 50vh; padding-bottom: 50vh;
-        }
+        #feed-container { flex: 1; overflow-y: scroll; overflow-x: hidden; scroll-snap-type: y mandatory; scroll-behavior: smooth; padding-top: 50vh; padding-bottom: 50vh; }
         #feed-container::-webkit-scrollbar { display: none; }
 
-        .empty-state { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            height: var(--card-height); width: 100%; 
-            scroll-snap-align: center; /* Snaps like a video */
-            margin: 20px auto; text-align: center;
-        }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--card-height); width: 100%; scroll-snap-align: center; margin: 20px auto; text-align: center; }
         .empty-icon { font-size: 4rem !important; color: #fff; opacity: 0.2; margin-bottom: 15px; }
         .empty-title { font-size: 1.4rem; font-weight: 500; margin-bottom: 5px; }
         .empty-desc { font-size: 0.9rem; color: #888; max-width: 260px; }
 
-        .video-item {
-            scroll-snap-align: center; scroll-snap-stop: always;
-            position: relative; width: 88%; height: var(--card-height);
-            margin: 20px auto; 
-            border-radius: 16px; background-color: #1a1a1a;
-            overflow: hidden; will-change: transform;
-            transform: scale(0.92); opacity: 0.5; filter: grayscale(100%) brightness(0.6);
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05);
-        }
+        .video-item { scroll-snap-align: center; scroll-snap-stop: always; position: relative; width: 88%; height: var(--card-height); margin: 20px auto; border-radius: 16px; background-color: #1a1a1a; overflow: hidden; will-change: transform; transform: scale(0.92); opacity: 0.5; filter: grayscale(100%) brightness(0.6); transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); }
         .video-thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
-        .video-item.active { 
-            transform: scale(1.05); opacity: 1; filter: grayscale(0%) brightness(1); 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.9); 
-            border: 2px solid rgba(255,255,255,0.3); 
-            z-index: 10; 
-        }
+        .video-item.active { transform: scale(1.05); opacity: 1; filter: grayscale(0%) brightness(1); box-shadow: 0 20px 60px rgba(0,0,0,0.9); border: 2px solid rgba(255,255,255,0.3); z-index: 10; }
         .video-item.deleting { animation: delAnim 0.3s forwards; }
         @keyframes delAnim { to { transform: scale(0); opacity: 0; height: 0; margin: 0; } }
 
@@ -102,38 +80,15 @@
         .v-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .v-auth { font-size: 0.8rem; color: var(--text-muted); }
 
-        #focus-frame {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 92%; height: 235px; pointer-events: none; z-index: 5;
-            border: 2px solid var(--accent); border-radius: 20px;
-            box-shadow: 0 0 30px var(--accent-glow), inset 0 0 20px var(--accent-glow);
-        }
-        #focus-tag {
-            position: absolute; top: -12px; left: 20px; background: var(--bg-color);
-            color: var(--accent); font-size: 0.7rem; font-weight: 800; padding: 0 8px;
-            letter-spacing: 1px; border-radius: 4px; border: 1px solid var(--accent);
-        }
+        #focus-frame { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 92%; height: 235px; pointer-events: none; z-index: 5; border: 2px solid var(--accent); border-radius: 20px; box-shadow: 0 0 30px var(--accent-glow), inset 0 0 20px var(--accent-glow); }
+        #focus-tag { position: absolute; top: -12px; left: 20px; background: var(--bg-color); color: var(--accent); font-size: 0.7rem; font-weight: 800; padding: 0 8px; letter-spacing: 1px; border-radius: 4px; border: 1px solid var(--accent); }
 
-        /* --- DOCK --- */
-        .dock {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 94%; max-width: 400px;
-            background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(25px);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 100px;
-            padding: 12px 10px; display: flex; align-items: center; justify-content: space-between;
-            z-index: 500; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-        }
+        .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 400px; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.15); border-radius: 100px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; z-index: 500; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
         .dock-left, .dock-right { display: flex; align-items: center; padding: 0 10px; }
         .dock-left { border-right: 1px solid rgba(255,255,255,0.15); }
         .dock-right { border-left: 1px solid rgba(255,255,255,0.15); }
         .dock-center { flex: 1; display: flex; justify-content: center; gap: 20px; }
-
-        .dock-btn {
-            width: 45px; height: 45px; border-radius: 50%; flex-shrink: 0;
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05);
-            color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.15s; padding: 0; margin: 0;
-        }
+        .dock-btn { width: 45px; height: 45px; border-radius: 50%; flex-shrink: 0; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; padding: 0; margin: 0; }
         .dock-btn span { font-size: 24px !important; line-height: 1 !important; display: block; }
         .dock-btn:active { transform: scale(0.85); }
         .dock-btn.liked { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
@@ -150,32 +105,71 @@
         #gesture-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: flex; }
         .g-zone { height: 100%; } .g-left { width: 30%; } .g-center { width: 40%; } .g-right { width: 30%; }
 
+        /* OPTIMIZED UI LAYER (No Blur for Performance) */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 20; background: rgba(0,0,0,0.4); display: flex; flex-direction: column;
-            justify-content: space-between; padding: 2rem 3rem; transition: opacity 0.3s ease; pointer-events: none;
+            z-index: 20; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.9) 100%);
+            display: flex; flex-direction: column; justify-content: space-between; padding: 2rem 3rem; 
+            transition: opacity 0.2s ease; pointer-events: none;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
+        
+        /* LOCK MODE STYLES */
+        /* When locked, hide these elements with opacity so they fade nicely */
+        #ui-layer.locked > .p-top > *:not(.lock-container),
+        #ui-layer.locked > .p-center,
+        #ui-layer.locked > .p-bottom, 
+        #ui-layer.locked #p-title {
+            opacity: 0 !important; pointer-events: none !important;
+        }
+        
+        /* Ensure Lock Button is ALWAYS clickable and visible in lock mode */
+        .lock-container { opacity: 1 !important; pointer-events: auto !important; z-index: 50; }
+        /* Style specifically for the active lock button */
+        .lock-btn.active-lock {
+            background: rgba(239, 68, 68, 0.3) !important;
+            border-color: rgba(239, 68, 68, 0.5) !important;
+            color: #ef4444 !important;
+        }
+
         #ui-layer .icon-btn, #ui-layer .progress-container, #ui-layer .clickable { pointer-events: auto; }
 
         .p-top { position: relative; height: 50px; display: flex; justify-content: space-between; align-items: center; }
-        #p-title { position: absolute; left: 50%; transform: translateX(-50%); width: 60%; text-align: center; font-weight: 700; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .p-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 30px; pointer-events: none; }
-        .icon-btn { width: 50px; height: 50px; border-radius: 50%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center; pointer-events: auto; cursor: pointer; }
-        .play-btn-lg { width: 80px; height: 80px; background: rgba(0,0,0,0.6); } .play-btn-lg span { font-size: 48px; }
-        .progress-container { width: 100%; padding: 15px 0; cursor: pointer; pointer-events: auto; }
-        .progress-track { width: 100%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; position: relative; }
-        .progress-fill { height: 100%; width: 0%; background: var(--accent); position: absolute; top: 0; left: 0; border-radius: 2px; }
-        .progress-thumb { position: absolute; right: -6px; top: -4px; width: 12px; height: 12px; background: white; border-radius: 50%; transform: scale(0); transition: 0.1s; }
-        .clickable { font-size: 0.9rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 5px 12px; background: rgba(0,0,0,0.4); pointer-events: auto; }
-
-        /* ANIMATED FEEDBACK */
-        .feedback-box {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(0,0,0,0.7); border-radius: 50%;
-            width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; z-index: 30;
+        
+        #p-title { 
+            position: absolute; left: 50%; transform: translateX(-50%); width: 50%; 
+            text-align: center; font-weight: 500; font-size: 1.1rem; color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 0.5px;
         }
+        
+        .p-controls-right { display: flex; gap: 15px; align-items: center; }
+        .p-controls-left { display: flex; gap: 15px; align-items: center; }
+
+        .p-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 40px; pointer-events: none; }
+        
+        /* Optimized Buttons (Removed Blur) */
+        .icon-btn { 
+            width: 44px; height: 44px; border-radius: 50%; 
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); 
+            color: white; display: flex; align-items: center; justify-content: center; 
+            pointer-events: auto; cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+        .play-btn-lg { width: 70px; height: 70px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); } 
+        .play-btn-lg span { font-size: 40px; }
+
+        .progress-container { width: 100%; padding: 15px 0; cursor: pointer; pointer-events: auto; }
+        .progress-track { width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; overflow: visible; }
+        .progress-fill { height: 100%; width: 0%; background: var(--accent); position: absolute; top: 0; left: 0; border-radius: 2px; }
+        .progress-thumb { position: absolute; right: -6px; top: -5px; width: 14px; height: 14px; background: white; border-radius: 50%; transform: scale(0); transition: 0.1s; }
+        
+        .clickable { font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 10px; background: rgba(0,0,0,0.3); pointer-events: auto; color: white; }
+
+        /* FEEDBACK */
+        .feedback-box { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; z-index: 30; }
         .fb-left { left: 15%; } .fb-right { right: 15%; } .fb-center { left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; }
         .feedback-box span { font-size: 2rem; font-weight: 700; color: white; }
         .feedback-anim { animation: fbPop 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
@@ -185,9 +179,11 @@
 
         .toast { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.95); padding: 10px 20px; border-radius: 30px; font-weight: 500; opacity: 0; z-index: 100; pointer-events: none; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
         .toast.visible { opacity: 1; }
+        
         #import-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 40000; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
         #import-overlay.active { display: flex; }
         .loader-text { margin-bottom: 20px; font-size: 1.2rem; font-weight: 600; } .loader-track { width: 60%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; } .loader-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.1s linear; }
+        
         #desktop-blocker { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 999999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem; }
         @media (min-width: 1025px) and (hover: hover) { #desktop-blocker { display: flex !important; } #app-root { display: none !important; } }
         #search-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); z-index: 200; display: flex; flex-direction: column; align-items: center; padding-top: 100px; opacity: 0; pointer-events: none; transition: 0.3s; }
@@ -198,8 +194,13 @@
 <body>
 
     <div id="startup-overlay">
-        <!-- Pure SVG Lock (No Fonts) -->
-        <svg class="svg-lock" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        <div class="vault-lock-wrapper">
+            <div class="scan-line"></div>
+            <svg class="svg-lock" viewBox="0 0 24 24">
+                <path class="lock-shackle" d="M12 2C9.24 2 7 4.24 7 7v3h10V7c0-2.76-2.24-5-5-5z" />
+                <path class="lock-body" d="M4 10v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10H4z" />
+            </svg>
+        </div>
     </div>
 
     <div id="import-overlay">
@@ -263,7 +264,6 @@
             <video id="main-video" playsinline></video>
             <div id="toast-msg" class="toast"></div>
 
-            <!-- Visual Feedback -->
             <div class="feedback-box fb-left" id="fb-left">
                 <span style="display:block">« 10s</span>
             </div>
@@ -282,13 +282,31 @@
 
             <div id="ui-layer">
                 <div class="p-top">
-                    <button class="icon-btn" onclick="closePlayer(); sfx.play('click')">
-                        <span class="material-symbols-rounded">arrow_back</span>
-                    </button>
+                    <div class="p-controls-left">
+                        <button class="icon-btn" onclick="closePlayer(); sfx.play('click')">
+                            <span class="material-symbols-rounded">arrow_back</span>
+                        </button>
+                        <!-- LOCK BUTTON WRAPPER -->
+                        <div class="lock-container" style="margin-left: 15px;">
+                            <button class="icon-btn lock-btn" onclick="toggleLock(); sfx.play('click')">
+                                <span class="material-symbols-rounded" id="lock-icon">lock_open</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div id="p-title">Title</div>
-                    <button class="icon-btn" onclick="toggleCaptions(); sfx.play('click')">
-                        <span class="material-symbols-rounded">closed_caption</span>
-                    </button>
+                    
+                    <div class="p-controls-right">
+                        <button class="icon-btn" onclick="togglePiP(); sfx.play('click')">
+                            <span class="material-symbols-rounded">picture_in_picture_alt</span>
+                        </button>
+                        <button class="icon-btn" onclick="toggleAudioTrack(); sfx.play('click')">
+                            <span class="material-symbols-rounded">music_note</span>
+                        </button>
+                        <button class="icon-btn" onclick="toggleCaptions(); sfx.play('click')">
+                            <span class="material-symbols-rounded">closed_caption</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="p-center">
@@ -307,8 +325,9 @@
                     <div class="progress-container" id="prog-container">
                         <div class="progress-track"><div class="progress-fill" id="prog-fill"><div class="progress-thumb"></div></div></div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.9rem; color:#ccc; font-weight:600;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; color:#ccc; font-weight:600;">
                         <span id="curr-time">0:00</span>
+                        <div class="clickable" onclick="cycleSpeed(); sfx.play('click')" id="speed-btn">1x</div>
                         <span id="dur-time">--:--</span>
                     </div>
                 </div>
@@ -317,38 +336,43 @@
     </div>
 
     <script>
-        const sfx={ctx:null,init:()=>{window.AudioContext=window.AudioContext||window.webkitAudioContext;sfx.ctx=new AudioContext},play:t=>{if(!sfx.ctx)sfx.init();if(sfx.ctx.state==='suspended')sfx.ctx.resume();const o=sfx.ctx.createOscillator(),g=sfx.ctx.createGain();o.connect(g);g.connect(sfx.ctx.destination);const n=sfx.ctx.currentTime;if(t==='start'){o.freq(60,n);o.freq(0,n+2);g.vol(0.5,n,1.5)}else if(t==='click'){o.type='triangle';o.freq(600,n);g.vol(0.05,n,.1)}else if(t==='delete'){o.freq(300,n);o.freq(50,n+.3);g.vol(0.1,n,.3)}else if(t==='snap'){o.type='sine';o.freq(150,n);g.vol(0.05,n,.05)}o.start(n);o.stop(n+1.5)}};AudioNode.prototype.vol=function(v,t,d){this.gain.setValueAtTime(v,t);this.gain.exponentialRampToValueAtTime(0.001,t+d)};AudioNode.prototype.freq=function(v,t){this.frequency.setValueAtTime(v,t)};Object.prototype.freq=function(v,t){this.frequency.setValueAtTime(v,t);};
+        const sfx={ctx:null,init:()=>{window.AudioContext=window.AudioContext||window.webkitAudioContext;sfx.ctx=new AudioContext},play:t=>{if(!sfx.ctx)sfx.init();if(sfx.ctx.state==='suspended')sfx.ctx.resume();const o=sfx.ctx.createOscillator(),g=sfx.ctx.createGain();o.connect(g);g.connect(sfx.ctx.destination);const n=sfx.ctx.currentTime;if(t==='scan'){o.type='sine';o.freq(1200,n);o.freq(200,n+1);g.vol(0.1,n,1)}else if(t==='unlock'){o.type='square';o.freq(100,n);o.freq(0,n+0.2);g.vol(0.3,n,0.2)}else if(t==='click'){o.type='triangle';o.freq(600,n);g.vol(0.05,n,.1)}else if(t==='delete'){o.freq(300,n);o.freq(50,n+.3);g.vol(0.1,n,.3)}else if(t==='snap'){o.type='sine';o.freq(150,n);g.vol(0.05,n,.05)}o.start(n);o.stop(n+1.5)}};AudioNode.prototype.vol=function(v,t,d){this.gain.setValueAtTime(v,t);this.gain.exponentialRampToValueAtTime(0.001,t+d)};AudioNode.prototype.freq=function(v,t){this.frequency.setValueAtTime(v,t)};Object.prototype.freq=function(v,t){this.frequency.setValueAtTime(v,t);};
 
         let activeVideos = [];
         let likes = new Set(JSON.parse(localStorage.getItem('vault_likes') || '[]'));
         let activeId = null;
         let appStarted = false;
+        let isLocked = false;
 
         function start() {
             if(appStarted)return; appStarted=true;
-            try{sfx.play('start')}catch(e){}
+            const overlay = document.getElementById('startup-overlay');
             setTimeout(()=>{
-                document.getElementById('startup-overlay').classList.add('zoom-anim');
+                try{sfx.play('scan')}catch(e){}
+                overlay.classList.add('scanning');
                 setTimeout(()=>{
-                    document.getElementById('startup-overlay').style.opacity='0';
+                    try{sfx.play('unlock')}catch(e){}
+                    overlay.classList.add('unlocked');
                     setTimeout(()=>{
-                        document.getElementById('startup-overlay').remove();
-                        document.getElementById('app-root').style.opacity='1';
-                        initFeed();
-                    },1000);
-                },800);
+                        overlay.classList.add('breach');
+                        setTimeout(()=>{
+                            overlay.style.opacity='0';
+                            setTimeout(()=>{
+                                overlay.remove();
+                                document.getElementById('app-root').style.opacity='1';
+                                initFeed();
+                            },500);
+                        },600);
+                    },800);
+                },1200);
             },500);
         }
         window.addEventListener('load',start); setTimeout(start,2000);
 
         const feed=document.getElementById('feed-container');
         function initFeed(){ 
-            const p=(window.innerHeight-220)/2; 
-            feed.style.paddingTop=p+'px'; feed.style.paddingBottom=p+'px';
-            renderFeed(); 
-            
-            // MATH-BASED HIGHLIGHTING (60FPS)
-            feed.onscroll = () => window.requestAnimationFrame(checkHighlight);
+            const p=(window.innerHeight-220)/2; feed.style.paddingTop=p+'px'; feed.style.paddingBottom=p+'px';
+            renderFeed(); feed.onscroll = () => window.requestAnimationFrame(checkHighlight);
             setTimeout(checkHighlight, 100);
         }
 
@@ -356,44 +380,25 @@
             const center = feed.scrollTop + (feed.clientHeight / 2);
             let closest = null; let minDiff = Infinity;
             const cards = document.querySelectorAll('.video-item');
-            
             cards.forEach(c => {
                 const cCenter = c.offsetTop + (c.clientHeight / 2);
                 const diff = Math.abs(center - cCenter);
                 if(diff < minDiff) { minDiff = diff; closest = c; }
             });
-
             if(closest) {
                 cards.forEach(c => c.classList.remove('active'));
                 closest.classList.add('active');
                 const newId = parseFloat(closest.dataset.id);
-                if(activeId !== newId) {
-                    activeId = newId;
-                    sfx.play('snap');
-                    updateDock();
-                }
+                if(activeId !== newId) { activeId = newId; sfx.play('snap'); updateDock(); }
             }
         }
 
         function renderFeed(){
             feed.innerHTML='';
-            // EMPTY STATE
-            if(activeVideos.length===0){
-                feed.innerHTML=`
-                    <div class="empty-state">
-                        <span class="material-symbols-rounded empty-icon">move_to_inbox</span>
-                        <div class="empty-title">Your vault is empty</div>
-                        <div class="empty-desc">Tap the + button below to add videos from your local storage.</div>
-                    </div>`;
-                activeId = null; 
-                checkTrash(); 
-                return;
-            }
-            
+            if(activeVideos.length===0){ feed.innerHTML=`<div class="empty-state"><span class="material-symbols-rounded empty-icon">move_to_inbox</span><div class="empty-title">Your vault is empty</div><div class="empty-desc">Tap the + button below to add videos from your local storage.</div></div>`; activeId = null; checkTrash(); return; }
             activeVideos.forEach(v=>{
                 const d=document.createElement('div'); d.className='video-item'; d.dataset.id=v.id;
-                d.innerHTML=`<img class="video-thumb-img" src="${v.thumb}">`+
-                            `<div class="video-info"><div class="v-title">${v.title}</div><div class="v-auth">${v.auth}</div></div>`;
+                d.innerHTML=`<img class="video-thumb-img" src="${v.thumb}"><div class="video-info"><div class="v-title">${v.title}</div><div class="v-auth">${v.auth}</div></div>`;
                 d.onclick=()=>{ if(d.classList.contains('active')) openPlayer(v); else d.scrollIntoView({behavior:'smooth',block:'center'}) };
                 feed.appendChild(d);
             });
@@ -401,179 +406,124 @@
         }
 
         function triggerImport(){document.getElementById('folder-input').click();}
-        
-        function checkTrash(){ 
-            const trash=document.getElementById('btn-trash');
-            if(activeVideos.length > 0) {trash.classList.add('active');} else {trash.classList.remove('active');}
-        }
-        
-        function deleteSelected(){
-            if(activeId === null) return;
-            const idx=activeVideos.findIndex(v=>v.id===activeId);
-            if(idx>-1){
-                const el=document.querySelector(`.video-item[data-id='${activeId}']`);
-                if(el) el.classList.add('deleting');
-                setTimeout(()=>{
-                    if(activeVideos[idx].src) URL.revokeObjectURL(activeVideos[idx].src);
-                    if(activeVideos[idx].thumb) URL.revokeObjectURL(activeVideos[idx].thumb);
-                    activeVideos.splice(idx,1);
-                    renderFeed(); initFeed(); 
-                    showToast("Deleted");
-                },300);
-            }
-        }
+        function checkTrash(){ const trash=document.getElementById('btn-trash'); if(activeVideos.length > 0) {trash.classList.add('active');} else {trash.classList.remove('active');} }
+        function deleteSelected(){ if(activeId === null) return; const idx=activeVideos.findIndex(v=>v.id===activeId); if(idx>-1){ const el=document.querySelector(`.video-item[data-id='${activeId}']`); if(el) el.classList.add('deleting'); setTimeout(()=>{ if(activeVideos[idx].src) URL.revokeObjectURL(activeVideos[idx].src); if(activeVideos[idx].thumb) URL.revokeObjectURL(activeVideos[idx].thumb); activeVideos.splice(idx,1); renderFeed(); initFeed(); showToast("Deleted"); },300); } }
 
         document.getElementById('folder-input').onchange = async (e)=>{
             const files = Array.from(e.target.files).filter(f=>f.type.startsWith('video/')||f.name.endsWith('.mkv'));
             if(files.length===0) return showToast("No videos");
-            
-            const l=document.getElementById('import-overlay'), fill=document.getElementById('loader-fill');
-            l.classList.add('active');
+            const l=document.getElementById('import-overlay'), fill=document.getElementById('loader-fill'); l.classList.add('active');
             const added=[];
-            
             for(let i=0; i<files.length; i++){
                 fill.style.width=Math.round(((i+1)/files.length)*100)+'%';
                 if(i%10===0) await new Promise(r=>setTimeout(r,0));
                 const u=URL.createObjectURL(files[i]);
                 added.push({id:Date.now()+i+Math.random(), title:files[i].name.replace(/\.[^/.]+$/,""), auth:"Local", src:u, thumb:await genThumb(u), isLocal:true, progress:0});
             }
-            activeVideos=[...activeVideos, ...added];
-            l.classList.remove('active');
-            initFeed(); 
-            showToast(`${added.length} Imported`);
+            activeVideos=[...activeVideos, ...added]; l.classList.remove('active'); initFeed(); showToast(`${added.length} Imported`);
         };
 
-        function genThumb(u){
-            return new Promise(r=>{
-                const v=document.createElement('video'); v.src=u; v.currentTime=5; v.muted=true;
-                v.onseeked=()=>{
-                    const c=document.createElement('canvas'); c.width=480; c.height=270;
-                    c.getContext('2d').drawImage(v,0,0,480,270);
-                    c.toBlob(b=>{ r(URL.createObjectURL(b)); v.src=''; },'image/jpeg',0.6);
-                };
-                v.onerror=()=>r('');
-            });
-        }
-
-        function updateDock(){
-            const l=document.getElementById('like-btn');
-            likes.has(activeId) ? l.classList.add('liked') : l.classList.remove('liked');
-            checkTrash();
-        }
-        function toggleLike(){
-            if(!activeId)return;
-            likes.has(activeId)?likes.delete(activeId):likes.add(activeId);
-            updateDock(); localStorage.setItem('vault_likes',JSON.stringify([...likes]))
-        }
+        function genThumb(u){ return new Promise(r=>{ const v=document.createElement('video'); v.src=u; v.currentTime=5; v.muted=true; v.onseeked=()=>{ const c=document.createElement('canvas'); c.width=480; c.height=270; c.getContext('2d').drawImage(v,0,0,480,270); c.toBlob(b=>{ r(URL.createObjectURL(b)); v.src=''; },'image/jpeg',0.6); }; v.onerror=()=>r(''); }); }
+        function updateDock(){ const l=document.getElementById('like-btn'); likes.has(activeId) ? l.classList.add('liked') : l.classList.remove('liked'); checkTrash(); }
+        function toggleLike(){ if(!activeId)return; likes.has(activeId)?likes.delete(activeId):likes.add(activeId); updateDock(); localStorage.setItem('vault_likes',JSON.stringify([...likes])) }
         function downloadVideo(){const v=activeVideos.find(x=>x.id===activeId);if(v){const a=document.createElement('a');a.href=v.src;a.download=v.title;a.click()}}
-        function shareVideo() {
-            const v = activeVideos.find(x => x.id === activeId);
-            if(!v) return;
-            if(navigator.share) {
-                fetch(v.src).then(r => r.blob()).then(blob => {
-                    const file = new File([blob], v.title + ".mp4", { type: blob.type });
-                    if(navigator.canShare && navigator.canShare({files:[file]})) navigator.share({ files: [file], title: v.title });
-                    else navigator.share({title: v.title, url: v.src});
-                });
-            } else showToast("Share not supported");
-        }
+        function shareVideo() { const v = activeVideos.find(x => x.id === activeId); if(!v) return; if(navigator.share) { fetch(v.src).then(r => r.blob()).then(blob => { const file = new File([blob], v.title + ".mp4", { type: blob.type }); if(navigator.canShare && navigator.canShare({files:[file]})) navigator.share({ files: [file], title: v.title }); else navigator.share({title: v.title, url: v.src}); }); } else showToast("Share not supported"); }
 
         const vid=document.getElementById('main-video'), overlay=document.getElementById('player-overlay'), ui=document.getElementById('ui-layer');
         let currentId=null, timer;
 
         function openPlayer(v){
-            currentId=v.id;
-            overlay.style.display='block';
+            currentId=v.id; overlay.style.display='block';
             vid.src=v.src; document.getElementById('p-title').innerText=v.title;
             if(v.progress) vid.currentTime=(v.progress/100)*v.duration||0;
             vid.play(); toggleUI(); updateIcon(true);
             if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
             try{screen.orientation.lock('landscape')}catch(e){}
+            isLocked = false; updateLockIcon();
         }
         
-        function closePlayer(){
-            vid.pause(); overlay.style.display='none';
-            if(document.exitFullscreen) document.exitFullscreen();
-            try{screen.orientation.unlock()}catch(e){}
-        }
-
+        function closePlayer(){ vid.pause(); overlay.style.display='none'; if(document.exitFullscreen) document.exitFullscreen(); try{screen.orientation.unlock()}catch(e){} }
         function playNext(){ const i=activeVideos.findIndex(v=>v.id===currentId); if(i<activeVideos.length-1) openPlayer(activeVideos[i+1]); }
         function playPrev(){ const i=activeVideos.findIndex(v=>v.id===currentId); if(i>0) openPlayer(activeVideos[i-1]); }
 
         function togglePlay(){ 
+            if(isLocked) { showUI(); return; } // Just show Lock button
             if(vid.paused){ vid.play(); updateIcon(true); triggerFeedback('fb-center', 'play_arrow'); } 
             else { vid.pause(); updateIcon(false); triggerFeedback('fb-center', 'pause'); } 
             showUI(); 
         }
         function updateIcon(p){ document.getElementById('play-icon').textContent = p?'pause':'play_arrow'; }
-        function toggleUI(){ ui.classList.toggle('hidden'); clearTimeout(timer); if(!ui.classList.contains('hidden') && !vid.paused) timer=setTimeout(()=>ui.classList.add('hidden'),3000); }
-        function showUI(){ ui.classList.remove('hidden'); clearTimeout(timer); if(!vid.paused) timer=setTimeout(()=>ui.classList.add('hidden'),3000); }
+        
+        // REVISED UI TOGGLE
+        function toggleUI(){ 
+            ui.classList.toggle('hidden'); 
+            clearTimeout(timer); 
+            if(!ui.classList.contains('hidden') && !vid.paused) timer=setTimeout(()=>ui.classList.add('hidden'),3000); 
+        }
+        function showUI(){ 
+            ui.classList.remove('hidden'); 
+            clearTimeout(timer); 
+            if(!vid.paused) timer=setTimeout(()=>ui.classList.add('hidden'),3000); 
+        }
 
         const bar=document.getElementById('prog-container');
-        vid.ontimeupdate=()=>{
-            document.getElementById('prog-fill').style.width=((vid.currentTime/vid.duration)*100)+'%'; 
-            document.getElementById('curr-time').innerText=fmt(vid.currentTime);
-            if(vid.duration) document.getElementById('dur-time').innerText=fmt(vid.duration);
+        vid.onloadedmetadata = () => { document.getElementById('dur-time').innerText = fmt(vid.duration); };
+        vid.ontimeupdate=()=>{ 
+            const dur = vid.duration; const cur = vid.currentTime; 
+            if(dur > 0) document.getElementById('prog-fill').style.width=((cur/dur)*100)+'%'; 
+            document.getElementById('curr-time').innerText=fmt(cur); document.getElementById('dur-time').innerText=fmt(dur);
         };
-        function seek(e){ const r=bar.getBoundingClientRect(); vid.currentTime=((e.touches?e.touches[0].clientX:e.clientX)-r.left)/r.width*vid.duration; showUI(); }
+        function seek(e){ if(isLocked) return; const r=bar.getBoundingClientRect(); vid.currentTime=((e.touches?e.touches[0].clientX:e.clientX)-r.left)/r.width*vid.duration; showUI(); }
         bar.ontouchstart=seek; bar.ontouchmove=seek;
 
         function toggleSearch(){ document.getElementById('search-overlay').classList.toggle('active'); if(document.getElementById('search-overlay').classList.contains('active'))document.getElementById('search-input').focus()}
         document.getElementById('search-input').oninput=(e)=>{
             const t=e.target.value.toLowerCase();
+            if(t === '' || activeVideos.length === 0) { renderFeed(); const p=(window.innerHeight-220)/2; feed.style.paddingTop=p+'px'; feed.style.paddingBottom=p+'px'; return; }
             feed.innerHTML='';
             const filtered = activeVideos.filter(v=>v.title.toLowerCase().includes(t));
-            if(filtered.length===0) { 
-                feed.innerHTML=`
-                    <div class="empty-state">
-                        <span class="material-symbols-rounded empty-icon">search_off</span>
-                        <div class="empty-title">No matches found</div>
-                        <div class="empty-desc">Try searching for a different title.</div>
-                    </div>`; 
-                return; 
-            }
+            if(filtered.length===0) { feed.innerHTML=`<div class="empty-state"><span class="material-symbols-rounded empty-icon">search_off</span><div class="empty-title">No matches found</div><div class="empty-desc">Try searching for a different title.</div></div>`; return; }
             filtered.forEach(v=>{
                 const d=document.createElement('div'); d.className='video-item'; d.dataset.id=v.id;
                 d.innerHTML=`<img class="video-thumb-img" src="${v.thumb}"><div class="video-info"><div class="v-title">${v.title}</div></div>`;
                 d.onclick=()=>openPlayer(v);
                 feed.appendChild(d);
             });
-            // IMPORTANT: Recalc padding for search results so they center properly
-            const p=(window.innerHeight-220)/2; feed.style.paddingTop=p+'px'; feed.style.paddingBottom=p+'px';
-            feed.scrollTo(0,0);
+            const p=(window.innerHeight-220)/2; feed.style.paddingTop=p+'px'; feed.style.paddingBottom=p+'px'; feed.scrollTo(0,0);
         };
 
         function showToast(m){ const t=document.getElementById('toast-msg'); t.innerText=m; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'),2000); }
-        function fmt(s){ if(isNaN(s))return'0:00'; const m=Math.floor(s/60),ss=Math.floor(s%60); return m+':'+(ss<10?'0':'')+ss; }
-        function toggleCaptions(){showToast("No Subtitles")}
-        function cycleSpeed(){ const s=[1,1.5,2,0.5]; let i=s.indexOf(vid.playbackRate); vid.playbackRate=s[(i+1)%4]; document.getElementById('speed-btn').innerText=vid.playbackRate+'x'; showUI();}
-        
-        /* --- GESTURE LOGIC (YOUTUBE EXACT) --- */
+        function fmt(s){ if(isNaN(s) || !isFinite(s)) return '0:00'; s = Math.floor(s); const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const ss = s % 60; if(h > 0) return `${h}:${m<10?'0':''}${m}:${ss<10?'0':''}${ss}`; return `${m}:${ss<10?'0':''}${ss}`; }
+        function toggleCaptions(){ if(vid.textTracks && vid.textTracks.length > 0) { const track = vid.textTracks[0]; track.mode = (track.mode === 'showing') ? 'hidden' : 'showing'; showToast(track.mode === 'showing' ? "Captions On" : "Captions Off"); } else { showToast("No Subtitles"); } }
+        function cycleSpeed(){ const s=[1,1.25,1.5,2,0.5]; let i=s.indexOf(vid.playbackRate); if(i===-1)i=0; vid.playbackRate=s[(i+1)%s.length]; document.getElementById('speed-btn').innerText=vid.playbackRate+'x'; showUI();}
+        function togglePiP() { if(document.pictureInPictureElement) document.exitPictureInPicture(); else if(document.pictureInPictureEnabled) vid.requestPictureInPicture(); else showToast("PiP Not Supported"); }
+        function toggleAudioTrack() { if(vid.audioTracks) { if(vid.audioTracks.length > 1) { for(let i=0; i<vid.audioTracks.length; i++){ if(vid.audioTracks[i].enabled){ vid.audioTracks[i].enabled = false; vid.audioTracks[(i+1)%vid.audioTracks.length].enabled = true; showToast(`Audio Track ${i+2}`); return; } } } else showToast("Single Track"); } else showToast("Track Switch Not Supported"); }
+
+        function toggleLock() {
+            isLocked = !isLocked;
+            updateLockIcon();
+            if(isLocked) { ui.classList.add('locked'); showToast("Screen Locked"); }
+            else { ui.classList.remove('locked'); showToast("Unlocked"); }
+            showUI();
+        }
+        function updateLockIcon() { 
+            const btn = document.querySelector('.lock-btn');
+            const icon = document.getElementById('lock-icon');
+            icon.innerText = isLocked ? 'lock' : 'lock_open'; 
+            if(isLocked) btn.classList.add('active-lock'); else btn.classList.remove('active-lock');
+        }
+
         let lastTapTime = 0;
         function handleTap(zone, e){
-            const now = new Date().getTime();
-            const timeDiff = now - lastTapTime;
+            // If locked, ANY tap just wakes up the UI (showing only the lock button)
+            if(isLocked) { showUI(); return; }
             
+            const now = new Date().getTime(); const timeDiff = now - lastTapTime;
             if(timeDiff < 300 && timeDiff > 0) {
-                // DOUBLE TAP
-                if(zone === 'left') { 
-                    vid.currentTime -= 10; 
-                    triggerFeedback('fb-left'); 
-                } else if(zone === 'right') { 
-                    vid.currentTime += 10; 
-                    triggerFeedback('fb-right'); 
-                }
+                if(zone === 'left') { vid.currentTime -= 10; triggerFeedback('fb-left'); } 
+                else if(zone === 'right') { vid.currentTime += 10; triggerFeedback('fb-right'); }
             } else {
-                // SINGLE TAP
-                setTimeout(() => {
-                    if(new Date().getTime() - lastTapTime >= 300) {
-                        if(zone === 'center') { 
-                            togglePlay();
-                        } else { 
-                            toggleUI(); 
-                        }
-                    }
-                }, 300);
+                setTimeout(() => { if(new Date().getTime() - lastTapTime >= 300) { if(zone === 'center') { togglePlay(); } else { toggleUI(); } } }, 300);
             }
             lastTapTime = now;
         }
@@ -581,7 +531,6 @@
         function triggerFeedback(id, icon) {
             const el = document.getElementById(id);
             if(icon) document.getElementById('fb-icon').textContent = icon;
-            
             el.classList.remove(id.includes('center') ? 'play-anim' : 'feedback-anim');
             void el.offsetWidth; 
             el.classList.add(id.includes('center') ? 'play-anim' : 'feedback-anim');
